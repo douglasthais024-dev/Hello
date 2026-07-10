@@ -96,7 +96,6 @@
         }
 
         /* --- CONTAINER PRINCIPAL DA APLICAÇÃO --- */
-        /* Configurado nativamente no padrão mobile */
         .chat-app-wrapper {
             width: 100%;
             height: 100vh;
@@ -211,7 +210,7 @@
             background-color: #bd2130;
         }
 
-        /* --- ÁREA DE MENSAGENS --- */
+        /* --- ÁREA DE MENSAGENS E AVATARS --- */
         .chat-messages {
             flex: 1;
             padding: 12px;
@@ -219,12 +218,42 @@
             background-color: #e5ddd5; 
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             transition: background-color 0.3s;
         }
 
-        .message {
+        .message-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
             max-width: 85%;
+        }
+
+        .message-row.sent {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-row.received {
+            align-self: flex-start;
+        }
+
+        .message-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-image: url('https://cdn-icons-png.flaticon.com/512/149/149071.png');
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+
+        .message-row.sent .message-avatar {
+            filter: hue-rotate(140deg); /* Diferencia levemente a cor da foto do remetente */
+        }
+
+        .message {
             padding: 8px 12px;
             border-radius: 8px;
             font-size: 0.88rem;
@@ -245,14 +274,26 @@
 
         .message.sent {
             background-color: #d9fdd3;
-            align-self: flex-end;
             border-top-right-radius: 0;
         }
 
         .message.received {
             background-color: #ffffff;
-            align-self: flex-start;
             border-top-left-radius: 0;
+        }
+
+        /* --- MENSAGEM PADRÃO (DEFAULT STATE) --- */
+        .default-empty-message {
+            text-align: center;
+            color: #555;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 12px;
+            margin: auto;
+            max-width: 85%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
 
         /* --- ÁREA DE INPUT --- */
@@ -271,7 +312,7 @@
             align-items: center;
         }
 
-        .emoji-toggle-btn, .camera-toggle-btn {
+        .emoji-toggle-btn, .camera-toggle-btn, .file-toggle-btn {
             background: none;
             border: none;
             font-size: 1.25rem;
@@ -280,7 +321,7 @@
             padding: 4px;
         }
 
-        .emoji-toggle-btn:hover, .camera-toggle-btn:hover {
+        .emoji-toggle-btn:hover, .camera-toggle-btn:hover, .file-toggle-btn:hover {
             transform: scale(1.1);
         }
 
@@ -317,7 +358,7 @@
             transform: scale(1.2);
         }
 
-        .chat-input-area input {
+        .chat-input-area input[type="text"] {
             flex: 1;
             padding: 9px 14px;
             border: 1px solid #ccc;
@@ -327,7 +368,7 @@
             transition: border 0.2s;
         }
 
-        .chat-input-area input:focus {
+        .chat-input-area input[type="text"]:focus {
             border-color: #007bff;
         }
 
@@ -347,7 +388,7 @@
             background-color: #0056b3;
         }
 
-        /* --- MODAL DA CÂMERA (AJUSTADO PARA REPRODUÇÃO EM FRAME MOBILE) --- */
+        /* --- MODAL DA CÂMERA --- */
         .camera-modal {
             display: none;
             position: absolute;
@@ -392,24 +433,20 @@
         .btn-capture { background-color: #28a745; color: white; }
         .btn-close-cam { background-color: #dc3545; color: white; }
 
-
-        /* ================================================================= */
-        /* --- PADRÃO DE RESOLUÇÃO DE CELULAR PARA TELAS GRANDES (DESKTOP) -- */
-        /* ================================================================= */
         @media (min-width: 481px) {
             body {
-                background-color: #1e1e24; /* Fundo escuro elegante atrás do celular simulation */
+                background-color: #1e1e24; 
                 background-image: radial-gradient(circle, #2c2c35 10%, transparent 11%);
                 background-size: 12px 12px;
             }
 
             .chat-app-wrapper {
-                width: 412px;           /* Largura padrão de smartphones modernos (ex: Pixel, iPhones Max) */
-                height: 88vh;           /* Altura simulando a proporção de tela infinita */
+                width: 412px;           
+                height: 88vh;           
                 max-height: 850px;
-                border-radius: 32px;    /* Cantos arredondados imitando as bordas físicas de um celular */
+                border-radius: 32px;    
                 box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-                border: 8px solid #2d2d30; /* Moldura externa simulando o aparelho */
+                border: 8px solid #2d2d30; 
             }
         }
     </style>
@@ -464,7 +501,10 @@
                     </div>
                 </div>
 
-                <button class="camera-toggle-btn" id="cameraToggleBtn" title="Tirar Foto">📸</button>
+                <button class="file-toggle-btn" id="fileToggleBtn" title="Enviar Foto do Aparelho">🖼️</button>
+                <input type="file" id="imageFileInput" accept="image/*" style="display: none;">
+
+                <button class="camera-toggle-btn" id="cameraToggleBtn" title="Tirar Foto da Câmera">📸</button>
 
                 <input type="text" id="messageInput" placeholder="Digite uma mensagem..." autocomplete="off">
                 <button class="send-btn" id="sendButton">Enviar</button>
@@ -526,6 +566,10 @@
         const cameraVideo = document.getElementById('cameraVideo');
         const closeCameraBtn = document.getElementById('closeCameraBtn');
         const capturePhotoBtn = document.getElementById('capturePhotoBtn');
+
+        // Seleção dos novos elementos de upload de foto
+        const fileToggleBtn = document.getElementById('fileToggleBtn');
+        const imageFileInput = document.getElementById('imageFileInput');
 
         // --- LÓGICA DE PAPÉIS DE PAREDE ---
         const wallpapers = ['#e5ddd5', '#ece5dd', '#2b3a4a', '#1e251f', '#f0f2f5', '#f7e3e3'];
@@ -601,6 +645,31 @@
 
         document.getElementById('menuWrapper').addEventListener('click', (e) => e.stopPropagation());
         document.getElementById('emojiWrapper').addEventListener('click', (e) => e.stopPropagation());
+
+        // --- SELEÇÃO DE FOTO DA GALERIA ---
+        fileToggleBtn.addEventListener('click', () => {
+            imageFileInput.click();
+        });
+
+        imageFileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                const fileRef = ref(storage, `images/gallery_${Date.now()}_${file.name}`);
+                const uploadResult = await uploadBytes(fileRef, file);
+                const downloadUrl = await getDownloadURL(uploadResult.ref);
+                
+                await addDoc(messagesRef, {
+                    imageUrl: downloadUrl,
+                    senderId: mySenderId,
+                    createdAt: serverTimestamp()
+                });
+                imageFileInput.value = ''; // Limpa o input
+            } catch (error) {
+                alert("Erro ao enviar imagem da galeria: " + error.message);
+            }
+        });
 
         // --- MANIPULAÇÃO DA CÂMERA ---
         cameraToggleBtn.addEventListener('click', async () => {
@@ -706,7 +775,14 @@
             }
         });
 
+        // Adiciona a mensagem contendo a foto padrão ao lado do balão
         function appendMessage(data, type) {
+            const rowDiv = document.createElement('div');
+            rowDiv.classList.add('message-row', type);
+
+            const avatarDiv = document.createElement('div');
+            avatarDiv.classList.add('message-avatar');
+
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', type);
             
@@ -719,11 +795,13 @@
             if (data.imageUrl) {
                 const imageEl = document.createElement('img');
                 imageEl.src = data.imageUrl;
-                imageEl.alt = "Imagem da Câmera";
+                imageEl.alt = "Imagem Enviada";
                 messageDiv.appendChild(imageEl);
             }
 
-            chatMessages.appendChild(messageDiv);
+            rowDiv.appendChild(avatarDiv);
+            rowDiv.appendChild(messageDiv);
+            chatMessages.appendChild(rowDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
@@ -731,13 +809,22 @@
             const q = query(messagesRef, orderBy("createdAt", "asc"));
             unsubscribeMessages = onSnapshot(q, (snapshot) => {
                 chatMessages.innerHTML = ''; 
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const type = data.senderId === mySenderId ? 'sent' : 'received';
-                    if (data.text || data.imageUrl) {
-                        appendMessage(data, type);
-                    }
-                });
+                
+                // --- CONTEXTO DEFAULT SE NÃO HOUVER MENSAGENS ---
+                if (snapshot.empty) {
+                    const defaultMessage = document.createElement('div');
+                    defaultMessage.classList.add('default-empty-message');
+                    defaultMessage.innerHTML = "👋 <strong>Bem-vindo ao Chat Premium!</strong><br>Ainda não há mensagens por aqui. Envie uma mensagem de texto ou clique no ícone 🖼️ para compartilhar uma foto!";
+                    chatMessages.appendChild(defaultMessage);
+                } else {
+                    snapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const type = data.senderId === mySenderId ? 'sent' : 'received';
+                        if (data.text || data.imageUrl) {
+                            appendMessage(data, type);
+                        }
+                    });
+                }
 
                 if (!isInitialLoad) {
                     snapshot.docChanges().forEach((change) => {
