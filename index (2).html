@@ -459,7 +459,7 @@
                 <input type="email" id="authEmail" placeholder="Seu e-mail" required>
                 <input type="password" id="authPassword" placeholder="Sua senha" required>
                 <button id="authSubmitBtn">Entrar</button>
-                <p id="authToggleText">Não tem uma conta? <span id="authToggleLink">Cadastre-se</span></p>
+                <p id="authToggleText"><span id="authToggleLabel">Não tem uma conta?</span> <span id="authToggleLink">Cadastre-se</span></p>
             </div>
         </div>
 
@@ -538,7 +538,7 @@
         const authPassword = document.getElementById('authPassword');
         const authSubmitBtn = document.getElementById('authSubmitBtn');
         const authToggleLink = document.getElementById('authToggleLink');
-        const authToggleText = document.getElementById('authToggleText');
+        const authToggleLabel = document.getElementById('authToggleLabel');
         const logoutButton = document.getElementById('logoutButton');
         const chatMessages = document.getElementById('chatMessages');
         const messageInput = document.getElementById('messageInput');
@@ -713,143 +713,9 @@
             if (isSignUpMode) {
                 authTitle.innerText = "Criar Conta";
                 authSubmitBtn.innerText = "Cadastrar";
-                authToggleText.innerHTML = 'Já tem uma conta? <span id="authToggleLink">Faça Login</span>';
+                authToggleLabel.innerText = "Já tem uma conta? ";
+                authToggleLink.innerText = "Faça Login";
             } else {
                 authTitle.innerText = "Fazer Login";
                 authSubmitBtn.innerText = "Entrar";
-                authToggleText.innerHTML = 'Não tem uma conta? <span id="authToggleLink">Cadastre-se</span>';
-            }
-            document.getElementById('authToggleLink').addEventListener('click', () => authToggleLink.click());
-        });
-
-        authSubmitBtn.addEventListener('click', async () => {
-            const email = authEmail.value.trim();
-            const password = authPassword.value;
-
-            if (!email || !password) {
-                alert("Por favor, preencha todos os campos.");
-                return;
-            }
-
-            try {
-                if (isSignUpMode) {
-                    await createUserWithEmailAndPassword(auth, email, password);
-                    alert("Conta criada com sucesso!");
-                } else {
-                    await signInWithEmailAndPassword(auth, email, password);
-                }
-            } catch (error) {
-                alert("Erro: " + error.message);
-            }
-        });
-
-        logoutButton.addEventListener('click', () => {
-            signOut(auth);
-        });
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                mySenderId = user.uid;
-                menuUserInfo.innerText = `Logado como:\n${user.email}`;
-                authContainer.style.display = 'none';
-                chatContainer.style.display = 'flex';
-                isInitialLoad = true; 
-                startChatListener();
-            } else {
-                mySenderId = null;
-                authContainer.style.display = 'flex';
-                chatContainer.style.display = 'none';
-                chatMessages.innerHTML = ''; 
-                if (unsubscribeMessages) unsubscribeMessages();
-            }
-        });
-
-        function appendMessage(data, type) {
-            const rowDiv = document.createElement('div');
-            rowDiv.classList.add('message-row', type);
-
-            const avatarDiv = document.createElement('div');
-            avatarDiv.classList.add('message-avatar');
-
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', type);
-            
-            if (data.text) {
-                const textSpan = document.createElement('span');
-                textSpan.innerText = data.text;
-                messageDiv.appendChild(textSpan);
-            }
-            
-            if (data.imageUrl) {
-                const imageEl = document.createElement('img');
-                imageEl.src = data.imageUrl;
-                imageEl.alt = "Imagem Enviada";
-                messageDiv.appendChild(imageEl);
-            }
-
-            rowDiv.appendChild(avatarDiv);
-            rowDiv.appendChild(messageDiv);
-            chatMessages.appendChild(rowDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function startChatListener() {
-            const q = query(messagesRef, orderBy("createdAt", "asc"));
-            unsubscribeMessages = onSnapshot(q, (snapshot) => {
-                chatMessages.innerHTML = ''; 
-                
-                if (snapshot.empty) {
-                    const defaultMessage = document.createElement('div');
-                    defaultMessage.classList.add('default-empty-message');
-                    defaultMessage.innerHTML = "👋 <strong>Bem-vindo ao Chat Premium!</strong><br>Ainda não há mensagens por aqui. Envie uma mensagem de texto ou clique no ícone 🖼️ para compartilhar uma foto!";
-                    chatMessages.appendChild(defaultMessage);
-                } else {
-                    snapshot.forEach((doc) => {
-                        const data = doc.data();
-                        const type = data.senderId === mySenderId ? 'sent' : 'received';
-                        if (data.text || data.imageUrl) {
-                            appendMessage(data, type);
-                        }
-                    });
-                }
-
-                if (!isInitialLoad) {
-                    snapshot.docChanges().forEach((change) => {
-                        if (change.type === "added") {
-                            const data = change.doc.data();
-                            if (data.senderId !== mySenderId) {
-                                handleIncomingNotification();
-                            }
-                        }
-                    });
-                }
-                isInitialLoad = false; 
-            });
-        }
-
-        async function sendMessage() {
-            const text = messageInput.value.trim();
-            if (text === '' || !mySenderId) return; 
-
-            try {
-                await addDoc(messagesRef, {
-                    text: text,
-                    senderId: mySenderId, 
-                    createdAt: serverTimestamp()
-                });
-                messageInput.value = ''; 
-                emojiPicker.classList.remove('active');
-            } catch (error) {
-                console.error("Erro ao enviar:", error);
-            }
-        }
-
-        sendButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        });
-    </script>
-</body>
-</html>
+                authToggleLabel
