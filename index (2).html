@@ -198,12 +198,12 @@
             background-color: #bd2130;
         }
 
-        /* --- ÁREA DE MENSAGENS (Tamanhos reduzidos) --- */
+        /* --- ÁREA DE MENSAGENS --- */
         .chat-messages {
             flex: 1;
             padding: 15px;
             overflow-y: auto;
-            background-color: #e5ddd5; /* Padrão inicial */
+            background-color: #e5ddd5; 
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -323,6 +323,67 @@
         .chat-input-area button.send-btn:hover {
             background-color: #0056b3;
         }
+
+        /* --- NOVO: REGRAS DE RESPONSIVIDADE PARA TELAS MENORES (ATÉ 480px) --- */
+        @media (max-width: 480px) {
+            .auth-card {
+                width: 92%;
+                padding: 25px 20px;
+            }
+
+            .chat-header {
+                padding: 10px 12px;
+                font-size: 0.95rem;
+            }
+
+            .menu-toggle-btn {
+                font-size: 1.2rem;
+            }
+
+            .dropdown-menu {
+                min-width: 175px;
+                right: -5px; /* Ajuste sutil para não colar na borda extrema */
+            }
+
+            .chat-messages {
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .message {
+                max-width: 85%; /* Balões maiores no celular evitam quebras desnecessárias de linha */
+                font-size: 0.85rem;
+                padding: 7px 10px;
+            }
+
+            .chat-input-area {
+                padding: 8px 12px;
+            }
+
+            .emoji-toggle-btn {
+                font-size: 1.2rem;
+                padding-right: 8px;
+            }
+
+            .emoji-picker {
+                width: 205px;
+                grid-template-columns: repeat(5, 1fr); /* Reduz para 5 colunas para encaixar melhor */
+                bottom: 135%;
+                max-height: 150px;
+                padding: 6px;
+            }
+
+            .chat-input-area input {
+                padding: 8px 14px;
+                font-size: 0.85rem;
+            }
+
+            .chat-input-area button.send-btn {
+                padding: 8px 14px;
+                margin-left: 8px;
+                font-size: 0.85rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -393,9 +454,8 @@
         let mySenderId = null;
         let isSignUpMode = false; 
         let unsubscribeMessages = null; 
-        let isInitialLoad = true; // Evita disparar alertas com o histórico antigo ao logar
+        let isInitialLoad = true;
 
-        // Elementos DOM
         const authContainer = document.getElementById('authContainer');
         const chatContainer = document.getElementById('chatContainer');
         const authTitle = document.getElementById('authTitle');
@@ -430,16 +490,14 @@
         const originalTitle = document.title;
         let unreadCount = 0;
 
-        // Gera um som agradável nativo via código (Sem carregar arquivos externos)
         function playNotificationSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                
                 let osc = audioCtx.createOscillator();
                 let gain = audioCtx.createGain();
                 
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // Nota D5
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); 
                 gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
                 
@@ -448,20 +506,18 @@
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.12);
             } catch (e) {
-                console.log("Áudio bloqueado ou não suportado pelo navegador.");
+                console.log("Áudio bloqueado ou não suportado.");
             }
         }
 
         function handleIncomingNotification() {
             playNotificationSound();
-            // Notificação visual no título da aba se o usuário não estiver olhando
             if (document.hidden) {
                 unreadCount++;
                 document.title = `📩 (${unreadCount}) Nova mensagem!`;
             }
         }
 
-        // Limpa as notificações visuais quando o usuário focar na janela
         window.addEventListener('focus', () => {
             unreadCount = 0;
             document.title = originalTitle;
@@ -541,7 +597,7 @@
                 menuUserInfo.innerText = `Logado como:\n${user.email}`;
                 authContainer.style.display = 'none';
                 chatContainer.style.display = 'flex';
-                isInitialLoad = true; // Reinicia a flag para carregar o histórico de mensagens de forma silenciosa
+                isInitialLoad = true; 
                 startChatListener();
             } else {
                 mySenderId = null;
@@ -560,7 +616,6 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // --- ESCUTAR MENSAGENS EM TEMPO REAL ---
         function startChatListener() {
             const q = query(messagesRef, orderBy("createdAt", "asc"));
             unsubscribeMessages = onSnapshot(q, (snapshot) => {
@@ -573,7 +628,6 @@
                     }
                 });
 
-                // Verifica modificações em tempo real para disparar a notificação se a mensagem for recebida
                 if (!isInitialLoad) {
                     snapshot.docChanges().forEach((change) => {
                         if (change.type === "added") {
@@ -584,7 +638,7 @@
                         }
                     });
                 }
-                isInitialLoad = false; // Após carregar a primeira leva de mensagens do histórico, ativa os alertas
+                isInitialLoad = false; 
             });
         }
 
