@@ -10,10 +10,9 @@
             padding: 0;
             box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent; /* Remove o flash azul ao tocar no celular */
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Ajuste crucial para mobile: evita scroll fantasma e se adapta às barras do navegador */
         body {
             height: 100vh;
             height: 100dvh; 
@@ -117,11 +116,9 @@
             background-size: cover;
             background-position: center;
             transition: background 0.3s ease;
-            /* Scroll suave para iOS */
             -webkit-overflow-scrolling: touch; 
         }
 
-        /* Oculta barra de rolagem padrão para parecer app nativo */
         .chat-messages::-webkit-scrollbar {
             width: 4px;
         }
@@ -142,7 +139,7 @@
         .message-bubble {
             padding: 10px 14px;
             border-radius: 18px;
-            max-width: 85%; /* Aproveita muito mais o espaço lateral no celular */
+            max-width: 85%; 
             font-size: 0.92rem;
             line-height: 1.4;
             color: white;
@@ -193,7 +190,7 @@
             border-radius: 24px;
             color: white;
             outline: none;
-            font-size: 0.95rem; /* Evita que o iOS dê zoom automático indesejado */
+            font-size: 0.95rem; 
         }
 
         .chat-input-area input[type="text"]::placeholder {
@@ -220,13 +217,13 @@
             background: #2563eb;
         }
 
-        /* --- SELETOR DE EMOJIS ESTILO "BOTTOM SHEET" NO MOBILE --- */
+        /* --- SELETOR DE EMOJIS ESTILO "BOTTOM SHEET" --- */
         .emoji-picker {
             display: none;
             position: absolute;
             bottom: 68px;
             left: 12px;
-            width: calc(100% - 24px); /* Ocupa a largura quase inteira do celular */
+            width: calc(100% - 24px); 
             background: rgba(15, 23, 42, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(15px);
@@ -244,7 +241,7 @@
         }
 
         .emoji-picker span {
-            font-size: 1.5rem; /* Ícones maiores para facilitar o clique com o polegar */
+            font-size: 1.5rem; 
             cursor: pointer;
             text-align: center;
             user-select: none;
