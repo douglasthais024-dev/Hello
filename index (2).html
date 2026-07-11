@@ -2,352 +2,271 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chat Firebase Premium</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Premium Flutuante</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Fundo escuro texturizado fixo para simular o ambiente de desktop/fundo */
+        /* Fundo da página imersivo para destacar a tela flutuante */
         body {
-            background-color: #1e1e24; 
-            background-image: radial-gradient(circle, #2c2c35 10%, transparent 11%);
-            background-size: 12px 12px;
             height: 100vh;
             width: 100vw;
-            overflow: hidden;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-
-        /* --- TELA DE LOGIN / CADASTRO --- */
-        .auth-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f0f2f5;
-            position: absolute;
-            z-index: 20;
-            border-radius: inherit;
-        }
-
-        .auth-card {
-            background-color: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            width: 100%;
-            max-width: 320px;
-            text-align: center;
-        }
-
-        .auth-card h2 {
-            margin-bottom: 20px;
-            color: #333;
-            font-size: 1.4rem;
-        }
-
-        .auth-card input {
-            width: 100%;
-            padding: 11px 14px;
-            margin-bottom: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            outline: none;
-            font-size: 0.9rem;
-        }
-
-        .auth-card input:focus {
-            border-color: #007bff;
-        }
-
-        .auth-card button {
-            width: 100%;
-            padding: 11px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .auth-card button:hover {
-            background-color: #0056b3;
-        }
-
-        .auth-card p {
-            margin-top: 15px;
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        .auth-card p span {
-            color: #007bff;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        /* --- CONTAINER PRINCIPAL TRAVADO EM FORMATO DE CELULAR --- */
-        .chat-app-wrapper {
-            width: 412px;           
-            height: 88vh;           
-            max-height: 850px;
-            border-radius: 32px;    
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-            border: 8px solid #2d2d30; 
-            background-color: #ffffff;
-            display: flex;
-            flex-direction: column;
             overflow: hidden;
             position: relative;
         }
 
-        .chat-container {
-            width: 100%;
-            height: 100%;
-            background-color: #ffffff;
+        /* Detalhes decorativos no fundo para dar efeito de profundidade */
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: 1;
+        }
+        body::before { top: 10%; left: 15%; }
+        body::after { bottom: 10%; right: 15%; }
+
+        /* --- TELA FLUTUANTE DO CHAT --- */
+        .window-floating {
+            position: relative;
+            z-index: 10;
+            width: 400px;
+            height: 650px;
+            max-width: 95vw;
+            max-height: 90vh;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            display: none; 
+            animation: floatIn 0.6s ease-out;
         }
 
+        @keyframes floatIn {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* --- CABEÇALHO --- */
         .chat-header {
-            background-color: #007bff;
-            color: white;
-            padding: 12px 15px;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 1rem;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-            z-index: 10;
         }
 
-        /* --- MENU DROPDOWN --- */
-        .menu-wrapper {
-            position: relative;
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .menu-toggle-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.3rem;
-            cursor: pointer;
-            padding: 3px 8px;
+        .avatar {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            transition: background 0.2s;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        .menu-toggle-btn:hover {
-            background-color: rgba(255, 255, 255, 0.2);
+        .user-info h3 {
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 600;
         }
 
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 130%;
-            background-color: white;
-            min-width: 190px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            border-radius: 8px;
-            padding: 8px;
-            z-index: 100;
-            flex-direction: column;
+        .user-info p {
+            color: #10b981;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
             gap: 4px;
         }
 
-        .dropdown-menu.active {
+        .user-info p::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background-color: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .header-actions {
             display: flex;
+            gap: 8px;
         }
 
-        .menu-user-info {
-            font-size: 0.78rem;
-            color: #666;
-            padding: 6px;
-            border-bottom: 1px solid #eee;
-            word-break: break-all;
-        }
-
-        .menu-item {
-            background: none;
+        .btn-action {
+            background: rgba(255, 255, 255, 0.1);
             border: none;
-            text-align: left;
-            padding: 8px;
-            font-size: 0.85rem;
-            color: #333;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: background 0.2s;
-        }
-
-        .menu-item:hover {
-            background-color: #f5f5f5;
-        }
-
-        .logout-btn {
-            background-color: #dc3545;
             color: white;
-            border: none;
-            padding: 8px;
-            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: bold;
-            transition: background 0.2s;
-            text-align: center;
-            margin-top: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+            transition: background 0.2s, transform 0.1s;
         }
 
-        .logout-btn:hover {
-            background-color: #bd2130;
+        .btn-action:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
         }
 
-        /* --- ÁREA DE MENSAGENS E AVATARS --- */
+        /* --- ÁREA DE MENSAGENS (COM PAPEL DE PAREDE) --- */
         .chat-messages {
             flex: 1;
-            padding: 12px;
+            padding: 20px;
             overflow-y: auto;
-            background-color: #e5ddd5; 
             display: flex;
             flex-direction: column;
             gap: 12px;
-            transition: background-color 0.3s;
-        }
-
-        .message-row {
-            display: flex;
-            align-items: flex-end;
-            gap: 8px;
-            max-width: 85%;
-        }
-
-        .message-row.sent {
-            align-self: flex-end;
-            flex-direction: row-reverse;
-        }
-
-        .message-row.received {
-            align-self: flex-start;
-        }
-
-        .message-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-image: url('https://cdn-icons-png.flaticon.com/512/149/149071.png');
+            background-color: #1e1b4b; /* Padrão Inicial */
             background-size: cover;
             background-position: center;
-            flex-shrink: 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            transition: background 0.4s ease;
         }
 
-        .message-row.sent .message-avatar {
-            filter: hue-rotate(140deg); 
+        /* Customização da barra de rolagem */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
         }
 
-        .message {
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.88rem;
-            line-height: 1.35;
-            word-wrap: break-word;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.08);
+        /* Balões de Mensagem */
+        .message-row {
             display: flex;
-            flex-direction: column;
+            width: 100%;
         }
 
-        .message img {
+        .message-row.sent { justify-content: flex-end; }
+        .message-row.received { justify-content: flex-start; }
+
+        .message-bubble {
+            padding: 10px 14px;
+            border-radius: 16px;
+            max-width: 80%;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            word-wrap: break-word;
+        }
+
+        .message-row.sent .message-bubble {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-bottom-right-radius: 2px;
+        }
+
+        .message-row.received .message-bubble {
+            background: rgba(255, 255, 255, 0.15);
+            border-bottom-left-radius: 2px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Exibição de Fotos no Chat */
+        .message-bubble img {
             max-width: 100%;
-            max-height: 250px;
-            border-radius: 6px;
+            max-height: 200px;
+            border-radius: 12px;
             margin-top: 4px;
+            display: block;
             object-fit: cover;
         }
 
-        .message.sent {
-            background-color: #d9fdd3;
-            border-top-right-radius: 0;
-        }
-
-        .message.received {
-            background-color: #ffffff;
-            border-top-left-radius: 0;
-        }
-
-        /* --- MENSAGEM PADRÃO (DEFAULT STATE) --- */
-        .default-empty-message {
-            text-align: center;
-            color: #555;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 12px;
-            margin: auto;
-            max-width: 85%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        /* --- ÁREA DE INPUT --- */
+        /* --- ÁREA DE ENTRADA / INPUT --- */
         .chat-input-area {
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
-            padding: 10px 12px;
-            background-color: #f0f0f0;
-            border-top: 1px solid #ddd;
             align-items: center;
-            gap: 6px;
-        }
-
-        .emoji-wrapper {
+            gap: 10px;
             position: relative;
-            display: flex;
-            align-items: center;
         }
 
-        .emoji-toggle-btn, .camera-toggle-btn, .file-toggle-btn {
-            background: none;
+        .chat-input-area input[type="text"] {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            border-radius: 50px;
+            color: white;
+            outline: none;
+            font-size: 0.9rem;
+            transition: border 0.2s;
+        }
+
+        .chat-input-area input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .chat-input-area input[type="text"]:focus {
+            border-color: #3b82f6;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-send {
+            background: #3b82f6;
+            color: white;
             border: none;
-            font-size: 1.25rem;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-weight: bold;
             cursor: pointer;
-            transition: transform 0.1s;
-            padding: 4px;
+            transition: background 0.2s;
         }
 
-        .emoji-toggle-btn:hover, .camera-toggle-btn:hover, .file-toggle-btn:hover {
-            transform: scale(1.1);
+        .btn-send:hover {
+            background: #2563eb;
         }
 
+        /* --- SELETOR DE EMOJIS FLUTUANTE --- */
         .emoji-picker {
             display: none;
             position: absolute;
-            bottom: 140%;
-            left: 0;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            padding: 6px;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-            width: 205px;
-            max-height: 150px;
-            overflow-y: auto;
-            z-index: 100;
+            bottom: 80px;
+            left: 16px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 10px;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            z-index: 30;
+            width: 240px;
         }
 
         .emoji-picker.active {
@@ -355,367 +274,175 @@
         }
 
         .emoji-picker span {
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             cursor: pointer;
             text-align: center;
             user-select: none;
+            transition: transform 0.1s;
         }
 
         .emoji-picker span:hover {
-            transform: scale(1.2);
+            transform: scale(1.25);
         }
-
-        .chat-input-area input[type="text"] {
-            flex: 1;
-            padding: 9px 14px;
-            border: 1px solid #ccc;
-            border-radius: 20px;
-            outline: none;
-            font-size: 0.88rem;
-            transition: border 0.2s;
-        }
-
-        .chat-input-area input[type="text"]:focus {
-            border-color: #007bff;
-        }
-
-        .chat-input-area button.send-btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 9px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.88rem;
-            transition: background 0.2s;
-        }
-
-        .chat-input-area button.send-btn:hover {
-            background-color: #0056b3;
-        }
-
-        /* --- MODAL DA CÂMERA --- */
-        .camera-modal {
-            display: none;
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 200;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            gap: 15px;
-            padding: 15px;
-            border-radius: inherit;
-        }
-
-        .camera-modal.active {
-            display: flex;
-        }
-
-        .camera-modal video {
-            width: 100%;
-            height: auto;
-            max-height: 70%;
-            border-radius: 8px;
-            background-color: #000;
-            object-fit: cover;
-        }
-
-        .camera-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .camera-actions button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-
-        .btn-capture { background-color: #28a745; color: white; }
-        .btn-close-cam { background-color: #dc3545; color: white; }
     </style>
 </head>
 <body>
 
-    <div class="chat-app-wrapper">
-
-        <div class="camera-modal" id="cameraModal">
-            <video id="cameraVideo" autoplay playsinline></video>
-            <div class="camera-actions">
-                <button class="btn-close-cam" id="closeCameraBtn">Fechar</button>
-                <button class="btn-capture" id="capturePhotoBtn">Tirar Foto 📸</button>
+    <div class="window-floating">
+        
+        <div class="chat-header">
+            <div class="user-profile">
+                <div class="avatar">🤖</div>
+                <div class="user-info">
+                    <h3>Chat Flutuante</h3>
+                    <p>Online</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-action" id="btnWallpaper" title="Mudar Papel de Parede">🖼️</button>
             </div>
         </div>
 
-        <div class="auth-container" id="authContainer">
-            <div class="auth-card">
-                <h2 id="authTitle">Fazer Login</h2>
-                <input type="email" id="authEmail" placeholder="Seu e-mail" required>
-                <input type="password" id="authPassword" placeholder="Sua senha" required>
-                <button id="authSubmitBtn">Entrar</button>
-                <p id="authToggleText"><span id="authToggleLabel">Não tem uma conta?</span> <span id="authToggleLink">Cadastre-se</span></p>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message-row received">
+                <div class="message-bubble">
+                    Olá! Sou o assistente local. Teste o envio de textos, os emojis 😊 ou adicione fotos do seu aparelho!
+                </div>
             </div>
         </div>
 
-        <div class="chat-container" id="chatContainer">
-            <div class="chat-header">
-                <span>Chat Firebase</span>
-                
-                <div class="menu-wrapper" id="menuWrapper">
-                    <button class="menu-toggle-btn" id="menuToggleBtn">⋮</button>
-                    <div class="dropdown-menu" id="dropdownMenu">
-                        <div class="menu-user-info" id="menuUserInfo">Carregando usuário...</div>
-                        <button class="menu-item" id="wallpaperButton">🖼️ Mudar Papel de Parede</button>
-                        <button class="logout-btn" id="logoutButton">Sair da Conta</button>
-                    </div>
-                </div>
-            </div>
+        <div class="emoji-picker" id="emojiPicker">
+            <span>😀</span><span>😃</span><span>😄</span><span>😁</span><span>😆</span><span>😅</span>
+            <span>😂</span><span>🤣</span><span>😊</span><span>😍</span><span>🥰</span><span>😘</span>
+            <span>😜</span><span>😎</span><span>👍</span><span>🔥</span><span>❤️</span><span>✨</span>
+        </div>
 
-            <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-area">
+            <button class="btn-action" id="btnEmoji">😊</button>
+            
+            <button class="btn-action" id="btnFile" title="Escolher Foto">📷</button>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
 
-            <div class="chat-input-area">
-                <div class="emoji-wrapper" id="emojiWrapper">
-                    <button class="emoji-toggle-btn" id="emojiToggleBtn">😊</button>
-                    <div class="emoji-picker" id="emojiPicker">
-                        <span>😀</span><span>😃</span><span>😄</span><span>😁</span><span>😆</span><span>😅</span>
-                        <span>😂</span><span>🤣</span><span>😊</span><span>😇</span><span>🙂</span><span>🙃</span>
-                        <span>😉</span><span>😌</span><span>😍</span><span>🥰</span><span>😘</span><span>😗</span>
-                        <span>😋</span><span>😛</span><span>😝</span><span>😜</span><span>🤪</span><span>😎</span>
-                        <span>👍</span><span>👎</span><span>👏</span><span>🙌</span><span>❤️</span><span>🔥</span>
-                    </div>
-                </div>
-
-                <button class="file-toggle-btn" id="fileToggleBtn" title="Enviar Foto do Aparelho">🖼️</button>
-                <input type="file" id="imageFileInput" accept="image/*" style="display: none;">
-
-                <button class="camera-toggle-btn" id="cameraToggleBtn" title="Tirar Foto da Câmera">📸</button>
-
-                <input type="text" id="messageInput" placeholder="Digite uma mensagem..." autocomplete="off">
-                <button class="send-btn" id="sendButton">Enviar</button>
-            </div>
+            <input type="text" id="messageInput" placeholder="Digite sua mensagem..." autocomplete="off">
+            
+            <button class="btn-send" id="btnSend">Enviar</button>
         </div>
 
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCWQKWMcD3yHBw18Ss58-UQIb9j3dHeXAU",
-            authDomain: "hello-e7d45.firebaseapp.com",
-            projectId: "hello-e7d45",
-            storageBucket: "hello-e7d45.firebasestorage.app",
-            messagingSenderId: "1060294872904",
-            appId: "1:1060294872904:web:6dde221970da5340362d7d",
-            measurementId: "G-NYZNNHG81T"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const storage = getStorage(app); 
-        const messagesRef = collection(db, "messages");
-
-        let mySenderId = null;
-        let isSignUpMode = false; 
-        let unsubscribeMessages = null; 
-        let isInitialLoad = true;
-        let videoStream = null;
-
-        const authContainer = document.getElementById('authContainer');
-        const chatContainer = document.getElementById('chatContainer');
-        const authTitle = document.getElementById('authTitle');
-        const authEmail = document.getElementById('authEmail');
-        const authPassword = document.getElementById('authPassword');
-        const authSubmitBtn = document.getElementById('authSubmitBtn');
-        const authToggleLink = document.getElementById('authToggleLink');
-        const authToggleLabel = document.getElementById('authToggleLabel');
-        const logoutButton = document.getElementById('logoutButton');
+    <script>
         const chatMessages = document.getElementById('chatMessages');
         const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        
-        const menuToggleBtn = document.getElementById('menuToggleBtn');
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        const menuUserInfo = document.getElementById('menuUserInfo');
-        const wallpaperButton = document.getElementById('wallpaperButton');
-        const emojiToggleBtn = document.getElementById('emojiToggleBtn');
+        const btnSend = document.getElementById('btnSend');
+        const btnEmoji = document.getElementById('btnEmoji');
         const emojiPicker = document.getElementById('emojiPicker');
+        const btnWallpaper = document.getElementById('btnWallpaper');
+        const btnFile = document.getElementById('btnFile');
+        const fileInput = document.getElementById('fileInput');
 
-        const cameraToggleBtn = document.getElementById('cameraToggleBtn');
-        const cameraModal = document.getElementById('cameraModal');
-        const cameraVideo = document.getElementById('cameraVideo');
-        const closeCameraBtn = document.getElementById('closeCameraBtn');
-        const capturePhotoBtn = document.getElementById('capturePhotoBtn');
-
-        const fileToggleBtn = document.getElementById('fileToggleBtn');
-        const imageFileInput = document.getElementById('imageFileInput');
-
-        // --- LÓGICA DE PAPÉIS DE PAREDE ---
-        const wallpapers = ['#e5ddd5', '#ece5dd', '#2b3a4a', '#1e251f', '#f0f2f5', '#f7e3e3'];
+        // --- LISTA DE PAPÉIS DE PAREDE ---
+        // Mistura de cores sólidas, gradientes e texturas CSS
+        const wallpapers = [
+            'linear-gradient(135deg, #1e1b4b 0%, #311042 100%)', // Padrão Escuro Roxo
+            'linear-gradient(135deg, #0f172a 0%, #0284c7 100%)', // Azul Noturno
+            '#111827', // Totalmente Negro Puro
+            'linear-gradient(to top, #09203f 0%, #537895 100%)', // Cinza Azulado Elegante
+            '#16a34a'  // Verde Estilo App de Mensagens Tradicional
+        ];
         let currentWallpaperIdx = 0;
-        
-        wallpaperButton.addEventListener('click', () => {
+
+        btnWallpaper.addEventListener('click', () => {
             currentWallpaperIdx = (currentWallpaperIdx + 1) % wallpapers.length;
-            chatMessages.style.backgroundColor = wallpapers[currentWallpaperIdx];
-            dropdownMenu.classList.remove('active');
+            chatMessages.style.background = wallpapers[currentWallpaperIdx];
         });
 
-        // --- SISTEMA DE NOTIFICAÇÃO ---
-        const originalTitle = document.title;
-        let unreadCount = 0;
-
-        function playNotificationSound() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                let osc = audioCtx.createOscillator();
-                let gain = audioCtx.createGain();
-                
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); 
-                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.12);
-            } catch (e) {
-                console.log("Áudio bloqueado ou não suportado.");
-            }
-        }
-
-        function handleIncomingNotification() {
-            playNotificationSound();
-            if (document.hidden) {
-                unreadCount++;
-                document.title = `📩 (${unreadCount}) Nova mensagem!`;
-            }
-        }
-
-        window.addEventListener('focus', () => {
-            unreadCount = 0;
-            document.title = originalTitle;
-        });
-
-        // --- INTERAÇÕES DOS MENUS ---
-        menuToggleBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdownMenu.classList.toggle('active');
-            emojiPicker.classList.remove('active');
-        });
-
-        emojiToggleBtn.addEventListener('click', (e) => {
+        // --- SISTEMA DE SELEÇÃO DE EMOJIS ---
+        btnEmoji.addEventListener('click', (e) => {
             e.stopPropagation();
             emojiPicker.classList.toggle('active');
-            dropdownMenu.classList.remove('active');
         });
 
-        emojiPicker.querySelectorAll('span').forEach(emojiSpan => {
-            emojiSpan.addEventListener('click', () => {
-                messageInput.value += emojiSpan.innerText;
+        emojiPicker.querySelectorAll('span').forEach(emoji => {
+            emoji.addEventListener('click', () => {
+                messageInput.value += emoji.innerText;
                 messageInput.focus();
             });
         });
 
+        // Fecha janelas ao clicar fora
         document.addEventListener('click', () => {
-            dropdownMenu.classList.remove('active');
             emojiPicker.classList.remove('active');
         });
+        emojiPicker.addEventListener('click', (e) => e.stopPropagation());
 
-        document.getElementById('menuWrapper').addEventListener('click', (e) => e.stopPropagation());
-        document.getElementById('emojiWrapper').addEventListener('click', (e) => e.stopPropagation());
+        // --- SISTEMA DE RENDERIZAÇÃO DE MENSAGENS ---
+        function appendMessage(content, type, isImage = false) {
+            const row = document.createElement('div');
+            row.classList.add('message-row', type);
 
-        // --- SELEÇÃO DE FOTO DA GALERIA ---
-        fileToggleBtn.addEventListener('click', () => {
-            imageFileInput.click();
+            const bubble = document.createElement('div');
+            bubble.classList.add('message-bubble');
+
+            if (isImage) {
+                const img = document.createElement('img');
+                img.src = content;
+                img.alt = "Imagem carregada";
+                img.onload = () => {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                };
+                bubble.appendChild(img);
+            } else {
+                bubble.innerText = content;
+            }
+
+            row.appendChild(bubble);
+            chatMessages.appendChild(row);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Enviar Mensagem de Texto
+        function handleSend() {
+            const text = messageInput.value.trim();
+            if (text === '') return;
+
+            appendMessage(text, 'sent');
+            messageInput.value = '';
+            emojiPicker.classList.remove('active');
+
+            // Simulador de Resposta Automática (Mock Bot)
+            setTimeout(() => {
+                appendMessage("Mensagem recebida com sucesso na tela flutuante! 🚀", 'received');
+            }, 1000);
+        }
+
+        btnSend.addEventListener('click', handleSend);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSend();
         });
 
-        imageFileInput.addEventListener('change', async (e) => {
+        // --- CARREGAMENTO DE FOTOS LOCAIS ---
+        btnFile.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
-            try {
-                const fileRef = ref(storage, `images/gallery_${Date.now()}_${file.name}`);
-                const uploadResult = await uploadBytes(fileRef, file);
-                const downloadUrl = await getDownloadURL(uploadResult.ref);
-                
-                await addDoc(messagesRef, {
-                    imageUrl: downloadUrl,
-                    senderId: mySenderId,
-                    createdAt: serverTimestamp()
-                });
-                imageFileInput.value = ''; 
-            } catch (error) {
-                alert("Erro ao enviar imagem da galeria: " + error.message);
-            }
-        });
-
-        // --- MANIPULAÇÃO DA CÂMERA ---
-        cameraToggleBtn.addEventListener('click', async () => {
-            try {
-                videoStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                cameraVideo.srcObject = videoStream;
-                cameraModal.classList.add('active');
-            } catch (err) {
-                alert("Não foi possível acessar a câmera: " + err.message);
-            }
-        });
-
-        function turnOffCamera() {
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-            }
-            cameraModal.classList.remove('active');
-        }
-
-        closeCameraBtn.addEventListener('click', turnOffCamera);
-
-        capturePhotoBtn.addEventListener('click', () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = cameraVideo.videoWidth;
-            canvas.height = cameraVideo.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
+            // Cria uma URL temporária local para a imagem selecionada pelo usuário
+            const localImgUrl = URL.createObjectURL(file);
             
-            turnOffCamera();
+            // Exibe a imagem enviada por você no chat
+            appendMessage(localImgUrl, 'sent', true);
 
-            canvas.toBlob(async (blob) => {
-                if (!blob) return;
-                try {
-                    const fileRef = ref(storage, `images/photo_${Date.now()}.jpg`);
-                    const uploadResult = await uploadBytes(fileRef, blob);
-                    const downloadUrl = await getDownloadURL(uploadResult.ref);
-                    
-                    await addDoc(messagesRef, {
-                        imageUrl: downloadUrl,
-                        senderId: mySenderId,
-                        createdAt: serverTimestamp()
-                    });
-                } catch (error) {
-                    alert("Erro ao enviar a imagem capturada: " + error.message);
-                }
-            }, 'image/jpeg');
+            // Resposta automatizada simulando o recebimento da imagem
+            setTimeout(() => {
+                appendMessage("Que foto legal! Ela foi processada localmente na interface. 📸✨", 'received');
+            }, 1500);
+
+            // Limpa o input de arquivo para permitir enviar a mesma imagem de novo se quiser
+            fileInput.value = '';
         });
-
-        // --- LOGIN / CADASTRO ---
-        authToggleLink.addEventListener('click', () => {
-            isSignUpMode = !isSignUpMode;
-            if (isSignUpMode) {
-                authTitle.innerText = "Criar Conta";
-                authSubmitBtn.innerText = "Cadastrar";
-                authToggleLabel.innerText = "Já tem uma conta? ";
-                authToggleLink.innerText = "Faça Login";
-            } else {
-                authTitle.innerText = "Fazer Login";
-                authSubmitBtn.innerText = "Entrar";
-                authToggleLabel
+    </script>
+</body>
+</html>
